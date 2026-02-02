@@ -36,7 +36,6 @@ root@U22GITLABNODE2:~# curl -v http://192.168.100.117:5000/
 
 <head>
     <!-- <title>INDEX HTML </title> -->
-    <title>NetworkTool General</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
