@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- <title>{{ title }} </title> -->
+    <title>NetworkTool General</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .main {
+            margin-left: 30px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <h1> Network tool </h1>
+
+<form action="/contact" method="post" class="form-contact">
+<p><label>Ping:  </label><input type="text" name="username" value="" requied />
+<p><label>Traceroute: </label><input type="text" name="email"    value="" requied />
+<p><textarea name="message" rows=7 cols=40></textarea>
+<p><input type="submit" value="Send" />
+</form>
+
+
+
+
+<ul>
+{% for m in menu %}
+<li> {{m}}</li>
+{% endfor %}
+</ul>
+
+         </div>
+        </div>
+</body>
+
+</html>

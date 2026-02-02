@@ -1,0 +1,103 @@
+stages:
+  - lint
+  - build
+  - deploy
+  - healthcheck
+
+.common_tags: &common_tags
+  tags:
+    - runner1
+
+
+variables:
+  DOCKER_USER: wiking3
+  REPO: wiking3/tms-dz32
+  IMAGE_TAG: tmsdz32-$CI_COMMIT_SHORT_SHA
+  PRJ_NAME: dz32
+  SSH_USER: gitlab-runner
+  REGISTRY: https://index.docker.io/v1/
+  PRJ_DIR: /home/gitlab-runner
+  HOST: 192.168.100.117
+
+ 
+
+lint-code:
+  stage: lint  
+  image: python:3.12-slim
+  before_script: 
+    - pip install pylint
+  script:
+    - pylint app.py
+  allow_failure: true
+  tags:
+    - runner1 
+
+
+build-kaniko:
+  stage: build
+  image: 
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  script:
+    - mkdir -p /kaniko/.docker
+    - ls -R
+    - pwd
+    - echo ${CI_PROJECT_DIR}
+    - echo "{\"auths\":{\"$REGISTRY\":{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_TOKEN\"}}}" > /kaniko/.docker/config.json
+    - |
+      /kaniko/executor \
+        --context "${CI_PROJECT_DIR}" \
+        --dockerfile "${CI_PROJECT_DIR}/Dockerfile" \
+        --destination "${REPO}:${IMAGE_TAG}"
+  tags:
+    - runner1 
+
+deploy-job:
+  stage: deploy
+  image: alpine
+  needs: ["build-kaniko"]
+  variables:
+    SSH_OPTS: -i id_rsa -o StrictHostKeyChecking=no
+    APP_IMAGE: ${REPO}:${IMAGE_TAG}
+  before_script:
+    - apk update && apk add --no-cache openssh
+    - apk add sudo
+    - mkdir -p ~/.ssh
+    - echo ${CI_PROJECT_DIR}
+    - echo "$SSH_KEY" | tr -d '\r' > ~/.ssh/id_rsa
+    - cd ~/.ssh/
+    - chmod 600 id_rsa
+    - eval "$(ssh-agent -s)"
+    - ssh-add id_rsa
+    - ssh-keyscan -H "$HOST" >> ~/.ssh/known_hosts
+    - chmod 644 ~/.ssh/known_hosts
+    - mkdir -p "$PRJ_DIR"
+    - chmod 777 $PRJ_DIR
+    - cd ${CI_PROJECT_DIR}
+    - ls -R
+    - pwd
+  script:
+    - scp $SSH_OPTIONS compose.yml ${SSH_USER}@${HOST}:/${PRJ_DIR}
+    - scp $SSH_OPTIONS init.sql ${SSH_USER}@${HOST}:/${PRJ_DIR}
+    - echo ${APP_IMAGE}
+    - export APP_IMAGE="${APP_IMAGE}"
+    - ssh $SSH_OPTIONS ${SSH_USER}@${HOST} "cd /${PRJ_DIR} &&
+      APP_IMAGE='${APP_IMAGE}'  docker compose up -d "  
+  tags:
+    - runner1     
+
+
+
+healthcheck:
+  stage: healthcheck
+  image: alpine/curl:8.17.0
+  needs: ["deploy-job"]
+  script:
+  - |
+    echo "Waiting"
+    sleep 10
+    netstat -tulpn
+    curl -f http://${HOST}:5000/
+  tags:
+    - runner1
+
