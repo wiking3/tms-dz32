@@ -14,7 +14,7 @@ root@U22GITLABNODE2:~# docker ps -a
   0dcd13acf4a6   wiking3/tms-dz32:tmsdz32-3a7a3cb2   "python app.py"          35 minutes ago   Up 35 minutes             0.0.0.0:5000->5000/tcp, [::]:5000->5000/tcp              gitlab-runner-app-1
   0552ce851b5f   mysql:8.0                           "docker-entrypoint.s…"   35 minutes ago   Up 35 minutes (healthy)   0.0.0.0:3306->3306/tcp, [::]:3306->3306/tcp, 33060/tcp   gitlab-runner-db-1
 
-#Проверка приложения на сервере назначения (192.168.100.117).
+<h2> #Проверка приложения на сервере назначения (192.168.100.117).  </h2>
 root@U22GITLABNODE2:~# curl -v http://192.168.100.117:5000/
 *   Trying 192.168.100.117:5000...
 * Connected to 192.168.100.117 (192.168.100.117) port 5000 (#0)
@@ -51,7 +51,7 @@ root@U22GITLABNODE2:~# curl -v http://192.168.100.117:5000/
 
 <body>
     <div class="main">
-        <h1> Network tool </h1>
+       
 <form action="/contact" method="post" class="form-contact">
 <p><label>Ping:  </label><input type="text" name="username" value="" requied />
 <p><label>Traceroute: </label><input type="text" name="email"    value="" requied />
